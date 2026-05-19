@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What are the main failure modes of naive RAG systems?",
+    "expected_answer": "Naive RAG fails due to poor retrieval precision, lack of reranking, and hallucination when retrieved context is insufficient."
+  },
+  {
+    "question": "How does Reciprocal Rank Fusion improve hybrid retrieval?",
+    "expected_answer": "RRF combines rankings from multiple retrievers by summing reciprocal ranks, reducing dependence on individual score scales."
+  },
+  {
+    "question": "What is the role of a cross-encoder in a RAG pipeline?",
+    "expected_answer": "A cross-encoder re-scores candidate passages by jointly encoding the query and passage, providing more accurate relevance scores than bi-encoders."
+  },
+  {
+    "question": "What metrics are used to evaluate RAG systems?",
+    "expected_answer": "Common metrics include faithfulness, answer relevancy, context precision, and context recall, as measured by frameworks like RAGAs."
+  },
+  {
+    "question": "How does BM25 differ from dense vector retrieval?",
+    "expected_answer": "BM25 uses term frequency and inverse document frequency for sparse keyword matching, while dense retrieval uses semantic embeddings to capture meaning beyond exact terms."
+  }
+]
