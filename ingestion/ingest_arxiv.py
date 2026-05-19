@@ -16,11 +16,14 @@ Requirements:
 """
 
 import arxiv
+import certifi
 import fitz  # PyMuPDF
 import json
 import os
 import re
+import ssl
 import time
+import urllib.request
 from pathlib import Path
 from tqdm import tqdm
 
@@ -54,6 +57,13 @@ def fetch_papers(query: str, max_results: int) -> list[arxiv.Result]:
     return results
 
 
+def _download_pdf(url: str, dest: Path) -> None:
+    """Download a PDF with certifi's CA bundle (fixes macOS python.org SSL errors)."""
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    with urllib.request.urlopen(url, context=ctx) as resp:
+        dest.write_bytes(resp.read())
+
+
 def download_pdfs(papers: list[arxiv.Result]) -> list[dict]:
     metadata = []
     print(f"\n[2/3] Downloading PDFs to {PDF_DIR}/")
@@ -64,7 +74,7 @@ def download_pdfs(papers: list[arxiv.Result]) -> list[dict]:
 
         if not pdf_path.exists():
             try:
-                paper.download_pdf(dirpath=str(PDF_DIR), filename=f"{paper_id}.pdf")
+                _download_pdf(paper.pdf_url, pdf_path)
                 time.sleep(1)
             except Exception as e:
                 print(f"      SKIP {paper_id}: {e}")

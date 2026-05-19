@@ -23,7 +23,8 @@ CORPUS_PATH = Path("data/corpus.json")
 CHROMA_DIR  = Path("data/chroma_db")
 COLLECTION  = "arxiv_rag"
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
-BATCH_SIZE  = 64
+BATCH_SIZE  = 32   # lower batch avoids MPS/RAM OOM on Mac
+DEVICE      = "cpu"  # MPS often OOMs during encode; CPU is fine for ~650 chunks
 
 # ── Load ──────────────────────────────────────────────────────────────────────
 
@@ -34,8 +35,8 @@ print(f"  {len(corpus)} chunks loaded")
 
 # ── Embed ─────────────────────────────────────────────────────────────────────
 
-print(f"\nLoading embedding model: {EMBED_MODEL}")
-model = SentenceTransformer(EMBED_MODEL)
+print(f"\nLoading embedding model: {EMBED_MODEL} (device={DEVICE})")
+model = SentenceTransformer(EMBED_MODEL, device=DEVICE)
 
 texts = [c["text"] for c in corpus]
 print(f"Embedding {len(texts)} chunks...")
