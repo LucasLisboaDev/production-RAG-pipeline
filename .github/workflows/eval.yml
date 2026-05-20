@@ -23,16 +23,28 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Restore Chroma DB cache
+      - name: Cache corpus and chroma DB
+        id: cache-data
         uses: actions/cache@v4
         with:
-          path: data/chroma_db
-          key: chroma-${{ hashFiles('data/corpus.json') }}
+          path: |
+            data/corpus.json
+            data/chroma_db
+          key: rag-data-v1-${{ hashFiles('ingestion/ingest_arxiv.py', 'ingestion/embed_corpus.py') }}
+
+      - name: Build corpus (download + chunk)
+        if: steps.cache-data.outputs.cache-hit != 'true'
+        run: python ingestion/ingest_arxiv.py
+
+      - name: Embed corpus into Chroma
+        if: steps.cache-data.outputs.cache-hit != 'true'
+        run: python ingestion/embed_corpus.py
 
       - name: Run RAGAs evaluation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LLM_PROVIDER: openai
+          TOKENIZERS_PARALLELISM: "false"
         run: pytest eval/evaluate.py -v --tb=short
 
       - name: Upload evaluation results
@@ -40,4 +52,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: eval-results
-          path: eval/results/
+          path: .pytest_cache/
