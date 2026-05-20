@@ -54,7 +54,11 @@ python ingestion/embed_corpus.py
 # 5. Run the API
 uvicorn api.main:app --reload
 
-# 6. Ask a question
+# 6. (Optional) Chat UI
+cd frontend && npm install && npm run dev
+# Open http://localhost:5173 — set VITE_API_URL in frontend/.env for deployed API
+
+# 7. Ask a question (curl)
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What are the main failure modes of naive RAG?"}'

@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          lfs: true  # pull corpus.json from Git LFS
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,21 +25,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Cache corpus and chroma DB
-        id: cache-data
+      - name: Cache chroma DB
+        id: cache-chroma
         uses: actions/cache@v4
         with:
-          path: |
-            data/corpus.json
-            data/chroma_db
-          key: rag-data-v1-${{ hashFiles('ingestion/ingest_arxiv.py', 'ingestion/embed_corpus.py') }}
-
-      - name: Build corpus (download + chunk)
-        if: steps.cache-data.outputs.cache-hit != 'true'
-        run: python ingestion/ingest_arxiv.py
+          path: data/chroma_db
+          key: chroma-v1-${{ hashFiles('data/corpus.json') }}
 
       - name: Embed corpus into Chroma
-        if: steps.cache-data.outputs.cache-hit != 'true'
+        if: steps.cache-chroma.outputs.cache-hit != 'true'
         run: python ingestion/embed_corpus.py
 
       - name: Run RAGAs evaluation

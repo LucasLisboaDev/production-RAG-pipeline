@@ -1,6 +1,10 @@
 .env
-data/
+
 .venv/
+data/papers/
+data/chroma_db/
+frontend/node_modules/
+frontend/dist/
 __pycache__/
 *.pyc
 *.pyo
