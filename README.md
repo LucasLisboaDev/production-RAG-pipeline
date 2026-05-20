@@ -1,5 +1,12 @@
 # RAG Portfolio Project — Ask My ArXiv Docs
 
+## Demo
+
+![API Demo](docs/api-demo.png)
+
+> Asking "limitations of retrieval augmented generation systems" returns
+> a cited answer grounded in 4 real ArXiv papers.
+
 A production-grade Retrieval-Augmented Generation (RAG) system that lets you
 query a corpus of ArXiv AI/ML papers with cited, grounded answers.
 
