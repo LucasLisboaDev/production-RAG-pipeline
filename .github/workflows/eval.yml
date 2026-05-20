@@ -22,9 +22,10 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-        run: pip install --upgrade openai
+  - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install --upgrade openai
 
       - name: Cache chroma DB
         id: cache-chroma
