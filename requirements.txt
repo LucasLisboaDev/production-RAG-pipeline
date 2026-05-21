@@ -22,5 +22,7 @@ anthropic>=0.28.0
 
 # Evaluation
 ragas==0.1.9
+langchain-core==0.1.52
+langchain-openai==0.1.8
 datasets>=2.19.0
 pytest>=8.2.0
