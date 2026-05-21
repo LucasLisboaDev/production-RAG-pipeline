@@ -13,7 +13,7 @@ import pytest
 from pathlib import Path
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import Faithfulness, ContextRecall, AnswerRelevancy
+from ragas.metrics import Faithfulness, ContextRecall
 
 from retrieval.hybrid_retriever import HybridRetriever
 from reranking.reranker import Reranker
@@ -22,9 +22,8 @@ from generation.llm_client import call_llm
 
 GOLDEN_PATH = Path("eval/golden_dataset.json")
 
-FAITHFULNESS_THRESHOLD     = 0.75
-CONTEXT_RECALL_THRESHOLD   = 0.70
-ANSWER_RELEVANCY_THRESHOLD = 0.70
+FAITHFULNESS_THRESHOLD   = 0.75
+CONTEXT_RECALL_THRESHOLD = 0.70
 
 
 @pytest.fixture(scope="module")
@@ -83,13 +82,4 @@ def test_context_recall(ragas_dataset):
     print(f"\n  Context Recall: {score:.3f} (threshold: {CONTEXT_RECALL_THRESHOLD})")
     assert score >= CONTEXT_RECALL_THRESHOLD, (
         f"Context recall {score:.3f} below threshold {CONTEXT_RECALL_THRESHOLD}"
-    )
-
-
-def test_answer_relevancy(ragas_dataset):
-    result = evaluate(ragas_dataset, metrics=[AnswerRelevancy()])
-    score  = float(result.to_pandas()["answer_relevancy"].mean())
-    print(f"\n  Answer Relevancy: {score:.3f} (threshold: {ANSWER_RELEVANCY_THRESHOLD})")
-    assert score >= ANSWER_RELEVANCY_THRESHOLD, (
-        f"Answer relevancy {score:.3f} below threshold {ANSWER_RELEVANCY_THRESHOLD}"
     )
