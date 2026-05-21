@@ -22,8 +22,8 @@ from generation.llm_client import call_llm
 
 GOLDEN_PATH = Path("eval/golden_dataset.json")
 
-FAITHFULNESS_THRESHOLD    = 0.75
-CONTEXT_RECALL_THRESHOLD  = 0.70
+FAITHFULNESS_THRESHOLD     = 0.75
+CONTEXT_RECALL_THRESHOLD   = 0.70
 ANSWER_RELEVANCY_THRESHOLD = 0.70
 
 
@@ -70,7 +70,7 @@ def ragas_dataset(pipeline, golden):
 
 def test_faithfulness(ragas_dataset):
     result = evaluate(ragas_dataset, metrics=[Faithfulness()])
-    score  = result["faithfulness"]
+    score  = float(result.to_pandas()["faithfulness"].mean())
     print(f"\n  Faithfulness: {score:.3f} (threshold: {FAITHFULNESS_THRESHOLD})")
     assert score >= FAITHFULNESS_THRESHOLD, (
         f"Faithfulness {score:.3f} below threshold {FAITHFULNESS_THRESHOLD}"
@@ -79,7 +79,7 @@ def test_faithfulness(ragas_dataset):
 
 def test_context_recall(ragas_dataset):
     result = evaluate(ragas_dataset, metrics=[ContextRecall()])
-    score  = result["context_recall"]
+    score  = float(result.to_pandas()["context_recall"].mean())
     print(f"\n  Context Recall: {score:.3f} (threshold: {CONTEXT_RECALL_THRESHOLD})")
     assert score >= CONTEXT_RECALL_THRESHOLD, (
         f"Context recall {score:.3f} below threshold {CONTEXT_RECALL_THRESHOLD}"
@@ -88,7 +88,7 @@ def test_context_recall(ragas_dataset):
 
 def test_answer_relevancy(ragas_dataset):
     result = evaluate(ragas_dataset, metrics=[AnswerRelevancy()])
-    score  = result["answer_relevancy"]
+    score  = float(result.to_pandas()["answer_relevancy"].mean())
     print(f"\n  Answer Relevancy: {score:.3f} (threshold: {ANSWER_RELEVANCY_THRESHOLD})")
     assert score >= ANSWER_RELEVANCY_THRESHOLD, (
         f"Answer relevancy {score:.3f} below threshold {ANSWER_RELEVANCY_THRESHOLD}"
