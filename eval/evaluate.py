@@ -6,8 +6,6 @@ measures faithfulness + context recall using RAGAs.
 
 Run locally:
     pytest eval/evaluate.py -v
-
-The CI pipeline runs this automatically on every PR.
 """
 
 import json
@@ -15,7 +13,7 @@ import pytest
 from pathlib import Path
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics.collections import faithfulness, context_recall, answer_relevancy
+from ragas.metrics import Faithfulness, ContextRecall, AnswerRelevancy
 
 from retrieval.hybrid_retriever import HybridRetriever
 from reranking.reranker import Reranker
@@ -24,9 +22,8 @@ from generation.llm_client import call_llm
 
 GOLDEN_PATH = Path("eval/golden_dataset.json")
 
-# Thresholds — CI fails if scores drop below these
-FAITHFULNESS_THRESHOLD   = 0.75
-CONTEXT_RECALL_THRESHOLD = 0.70
+FAITHFULNESS_THRESHOLD    = 0.75
+CONTEXT_RECALL_THRESHOLD  = 0.70
 ANSWER_RELEVANCY_THRESHOLD = 0.70
 
 
@@ -52,7 +49,7 @@ def ragas_dataset(pipeline, golden):
     questions, answers, contexts, ground_truths = [], [], [], []
 
     for item in golden:
-        question = item["question"]
+        question   = item["question"]
         candidates = retriever.retrieve(question)
         top_chunks = reranker.rerank(question, candidates, top_k=5)
         messages   = build_prompt(question, top_chunks)
@@ -64,16 +61,16 @@ def ragas_dataset(pipeline, golden):
         ground_truths.append(item["expected_answer"])
 
     return Dataset.from_dict({
-        "question":    questions,
-        "answer":      answers,
-        "contexts":    contexts,
+        "question":     questions,
+        "answer":       answers,
+        "contexts":     contexts,
         "ground_truth": ground_truths,
     })
 
 
 def test_faithfulness(ragas_dataset):
-    result = evaluate(ragas_dataset, metrics=[faithfulness])
-    score = result["faithfulness"]
+    result = evaluate(ragas_dataset, metrics=[Faithfulness()])
+    score  = result["faithfulness"]
     print(f"\n  Faithfulness: {score:.3f} (threshold: {FAITHFULNESS_THRESHOLD})")
     assert score >= FAITHFULNESS_THRESHOLD, (
         f"Faithfulness {score:.3f} below threshold {FAITHFULNESS_THRESHOLD}"
@@ -81,8 +78,8 @@ def test_faithfulness(ragas_dataset):
 
 
 def test_context_recall(ragas_dataset):
-    result = evaluate(ragas_dataset, metrics=[context_recall])
-    score = result["context_recall"]
+    result = evaluate(ragas_dataset, metrics=[ContextRecall()])
+    score  = result["context_recall"]
     print(f"\n  Context Recall: {score:.3f} (threshold: {CONTEXT_RECALL_THRESHOLD})")
     assert score >= CONTEXT_RECALL_THRESHOLD, (
         f"Context recall {score:.3f} below threshold {CONTEXT_RECALL_THRESHOLD}"
@@ -90,8 +87,8 @@ def test_context_recall(ragas_dataset):
 
 
 def test_answer_relevancy(ragas_dataset):
-    result = evaluate(ragas_dataset, metrics=[answer_relevancy])
-    score = result["answer_relevancy"]
+    result = evaluate(ragas_dataset, metrics=[AnswerRelevancy()])
+    score  = result["answer_relevancy"]
     print(f"\n  Answer Relevancy: {score:.3f} (threshold: {ANSWER_RELEVANCY_THRESHOLD})")
     assert score >= ANSWER_RELEVANCY_THRESHOLD, (
         f"Answer relevancy {score:.3f} below threshold {ANSWER_RELEVANCY_THRESHOLD}"
