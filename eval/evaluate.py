@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, context_recall, answer_relevancy
+from ragas.metrics.collections import faithfulness, context_recall, answer_relevancy
 
 from retrieval.hybrid_retriever import HybridRetriever
 from reranking.reranker import Reranker

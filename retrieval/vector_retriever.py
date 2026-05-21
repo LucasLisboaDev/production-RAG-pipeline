@@ -23,33 +23,29 @@ class VectorRetriever:
         self.client = get_client()
 
     def retrieve(self, query: str) -> list[dict]:
-        # Embed the query
-        query_vec = self.model.encode(
-            query,
-            normalize_embeddings=True,
-        ).tolist()
+    query_vec = self.model.encode(
+        query,
+        normalize_embeddings=True,
+    ).tolist()
 
-        # Search Qdrant Cloud
-        results = self.client.search(
-            collection_name=COLLECTION_NAME,
-            query_vector=query_vec,
-            limit=self.top_k,
-            with_payload=True,
-        )
+    results = self.client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_vec,
+        limit=self.top_k,
+        with_payload=True,
+    ).points
 
-        # Format results to match the same schema as before
-        chunks = []
-        for hit in results:
-            payload = hit.payload
-            chunks.append({
-                "text":        payload["text"],
-                "score":       hit.score,
-                "source":      "vector",
-                "title":       payload["title"],
-                "arxiv_url":   payload["arxiv_url"],
-                "published":   payload["published"],
-                "paper_id":    payload["paper_id"],
-                "chunk_index": payload["chunk_index"],
-            })
-
-        return chunks
+    chunks = []
+    for hit in results:
+        payload = hit.payload
+        chunks.append({
+            "text":        payload["text"],
+            "score":       hit.score,
+            "source":      "vector",
+            "title":       payload["title"],
+            "arxiv_url":   payload["arxiv_url"],
+            "published":   payload["published"],
+            "paper_id":    payload["paper_id"],
+            "chunk_index": payload["chunk_index"],
+        })
+    return chunks
