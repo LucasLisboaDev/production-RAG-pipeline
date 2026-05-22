@@ -14,6 +14,8 @@ from pathlib import Path
 from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import Faithfulness, ContextRecall
+from ragas.llms import LangchainLLMWrapper
+from langchain_openai import ChatOpenAI
 
 from retrieval.hybrid_retriever import HybridRetriever
 from reranking.reranker import Reranker
