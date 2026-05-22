@@ -34,8 +34,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000",
+        "https://production-rag-pipeline.vercel.app",
         "https://*.vercel.app",
-        "*",  # tighten this once you have your Vercel URL
     ],
     allow_credentials=True,
     allow_methods=["*"],
