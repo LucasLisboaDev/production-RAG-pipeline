@@ -1,9 +1,9 @@
 """
-FastAPI Application (Week 3)
-==============================
-Ties together the full RAG pipeline into a REST API.
+FastAPI Application
+====================
+Production RAG pipeline exposed as a REST API.
 
-Run:
+Run locally:
     uvicorn api.main:app --reload
 
 Endpoints:
@@ -11,6 +11,7 @@ Endpoints:
     GET  /health  — Health check
 """
 
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -26,27 +27,48 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# ── CORS ──────────────────────────────────────────────────────────────────────
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "https://*.vercel.app",
+        "*",  # tighten this once you have your Vercel URL
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load models once at startup
-retriever = HybridRetriever(top_k=20)
-reranker  = Reranker()
+# ── Lazy model loading ────────────────────────────────────────────────────────
+# Models are loaded on first request, not at startup.
+# This prevents Railway from crashing before env vars are ready.
+
+_retriever = None
+_reranker  = None
+
+
+def get_retriever() -> HybridRetriever:
+    global _retriever
+    if _retriever is None:
+        _retriever = HybridRetriever(top_k=20)
+    return _retriever
+
+
+def get_reranker() -> Reranker:
+    global _reranker
+    if _reranker is None:
+        _reranker = Reranker()
+    return _reranker
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
 class QueryRequest(BaseModel):
     question: str
-    top_k: int = 5   # final chunks passed to LLM after reranking
+    top_k: int = 5
 
 
 class Citation(BaseModel):
@@ -65,7 +87,11 @@ class QueryResponse(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    corpus_exists = Path("data/corpus.json").exists()
+    return {
+        "status":  "ok",
+        "corpus":  corpus_exists,
+    }
 
 
 @app.post("/query", response_model=QueryResponse)
@@ -73,11 +99,11 @@ def query(req: QueryRequest):
     if not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    # 1. Hybrid retrieval (BM25 + vector + RRF)
-    candidates = retriever.retrieve(req.question)
+    # 1. Hybrid retrieval
+    candidates = get_retriever().retrieve(req.question)
 
-    # 2. Cross-encoder reranking
-    top_chunks = reranker.rerank(req.question, candidates, top_k=req.top_k)
+    # 2. Reranking
+    top_chunks = get_reranker().rerank(req.question, candidates, top_k=req.top_k)
 
     if not top_chunks:
         raise HTTPException(status_code=404, detail="No relevant chunks found.")
