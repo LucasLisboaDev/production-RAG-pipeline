@@ -1,4 +1,5 @@
 # RAG Portfolio Project — Ask My ArXiv Docs
+![RAG Evaluation CI](https://github.com/LucasLisboaDev/production-RAG-pipeline/actions/workflows/eval.yml/badge.svg)
 
 ## Demo
 
