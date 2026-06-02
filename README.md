@@ -8,6 +8,14 @@ A production-grade Retrieval-Augmented Generation system that answers natural la
 
 ---
 
+## Live demo
+
+![Ask "What are the limitations of RAG?" — cited answer grounded in ArXiv papers](LimitationsOfRag-printscreen.png)
+
+> Asking *"What are the limitations of RAG?"* returns a structured, cited answer grounded in real ArXiv papers — with clickable source links in the chat UI.
+
+---
+
 ## Pipeline overview
 
 ![RAG pipeline architecture diagram](RAG-PIPELINE.jpeg)
